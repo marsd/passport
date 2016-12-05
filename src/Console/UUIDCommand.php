@@ -7,6 +7,7 @@ use Laravel\Passport\Passport;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
+use Ramsey\Uuid\Uuid as UUID;
 
 class UUIDCommand extends Command
 {
@@ -25,7 +26,6 @@ class UUIDCommand extends Command
     protected $description = 'Generate version 4 UUIDs for existing Passport clients';
 
     /**
-     * Only show this command if Passport::useClientUUIDs is true
      *
      * @return null
      */
@@ -60,7 +60,7 @@ class UUIDCommand extends Command
         $clients = Client::where('uuid', null)->get();
 
         foreach($clients as $client) {
-            $client->uuid = UUID::generate(4)->string;
+            $client->uuid = UUID::uuid4()->toString();
             $client->save();
         }
 

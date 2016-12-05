@@ -2,7 +2,7 @@
 
 namespace Laravel\Passport;
 
-use Webpatser\Uuid\Uuid as UUID;
+use Ramsey\Uuid\Uuid as UUID;
 
 class ClientRepository
 {
@@ -103,7 +103,7 @@ class ClientRepository
         ];
 
         if (Passport::$useClientUUIDs) {
-            $data['uuid'] = UUID::generate(4)->string;
+            $data['uuid'] = UUID::uuid4()->toString();
         }
 
         $client = (new Client)->forceFill($data);
