@@ -75,6 +75,13 @@ class Passport
     public static $useClientUUIDs = false;
 
     /**
+     * Specify which middleware should be used with the oauth/personal-access-token routes
+     *
+     * @var array
+     */
+    public static $personalAccessTokenRouteMiddleware = ['web', 'auth'];
+
+    /**
      * Get a Passport route registrar.
      *
      * @param  array  $options
@@ -282,6 +289,18 @@ class Passport
     public static function useClientUUIDs()
     {
         static::$useClientUUIDs = true;
+
+        return new static;
+    }
+    
+    /**
+     * Instruct Passport to use auth:api middleware for personal access token routes
+     *
+     * @return static
+     */
+    public static function personalAccessTokenRouteMiddleware(array $middleware)
+    {
+        static::$personalAccessTokenRouteMiddleware = $middleware;
 
         return new static;
     }
