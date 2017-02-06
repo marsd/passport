@@ -56,11 +56,17 @@ class TokenRepository
      */
     public function isAccessTokenRevoked($id)
     {
-        return Token::where('id', $id)->where('revoked', true)->exists();
+        if ($token = $this->find($id)) {
+            return $token->revoked;
+        }
+
+        return true;
     }
 
     /**
      * Revoke all of the access tokens for a given user and client.
+     *
+     * @deprecated since 1.0. Listen to Passport events on token creation instead.
      *
      * @param  mixed  $clientId
      * @param  mixed  $userId
@@ -69,17 +75,6 @@ class TokenRepository
      */
     public function revokeOtherAccessTokens($clientId, $userId, $except = null, $prune = false)
     {
-        $query = Token::where('user_id', $userId)
-                      ->where('client_id', $clientId);
-
-        if ($except) {
-            $query->where('id', '<>', $except);
-        }
-
-        if ($prune) {
-            $query->delete();
-        } else {
-            $query->update(['revoked' => true]);
-        }
+        //
     }
 }

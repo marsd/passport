@@ -2,6 +2,7 @@
 
 namespace Laravel\Passport;
 
+use Mockery;
 use DateInterval;
 use Carbon\Carbon;
 use DateTimeInterface;
@@ -9,6 +10,20 @@ use Illuminate\Support\Facades\Route;
 
 class Passport
 {
+    /**
+     * Indicates if the implicit grant type is enabled.
+     *
+     * @var boolean|null
+     */
+    public static $implicitGrantEnabled = false;
+
+    /**
+     * Indicates if Passport should revoke existing tokens when issuing a new one.
+     *
+     * @var bool
+     */
+    public static $revokeOtherTokens = false;
+
     /**
      * Indicates if Passport should prune revoked tokens.
      *
@@ -75,11 +90,16 @@ class Passport
     public static $useClientUUIDs = false;
 
     /**
-     * Specify which middleware should be used with the oauth/personal-access-token routes
+     * Enable the implicit grant type.
      *
-     * @var array
+     * @return static
      */
-    public static $personalAccessTokenRouteMiddleware = ['web', 'auth'];
+    public static function enableImplicitGrant()
+    {
+        static::$implicitGrantEnabled = true;
+
+        return new static;
+    }
 
     /**
      * Get a Passport route registrar.
@@ -103,14 +123,26 @@ class Passport
     }
 
     /**
+     * Instruct Passport to revoke other tokens when a new one is issued.
+     *
+     * @deprecated since 1.0. Listen to Passport events on token creation instead.
+     *
+     * @return static
+     */
+    public static function revokeOtherTokens()
+    {
+        return new static;
+    }
+
+    /**
      * Instruct Passport to keep revoked tokens pruned.
+     *
+     * @deprecated since 1.0. Listen to Passport events on token creation instead.
      *
      * @return static
      */
     public static function pruneRevokedTokens()
     {
-        static::$pruneRevokedTokens = true;
-
         return new static;
     }
 
@@ -199,7 +231,7 @@ class Passport
         if (is_null($date)) {
             return static::$tokensExpireAt
                             ? Carbon::now()->diff(static::$tokensExpireAt)
-                            : new DateInterval('P100Y');
+                            : new DateInterval('P1Y');
         } else {
             static::$tokensExpireAt = $date;
         }
@@ -218,7 +250,7 @@ class Passport
         if (is_null($date)) {
             return static::$refreshTokensExpireAt
                             ? Carbon::now()->diff(static::$refreshTokensExpireAt)
-                            : new DateInterval('P100Y');
+                            : new DateInterval('P1Y');
         } else {
             static::$refreshTokensExpireAt = $date;
         }
@@ -241,6 +273,29 @@ class Passport
         }
 
         return new static;
+    }
+
+    /**
+     * Set the current user for the application with the given scopes.
+     *
+     * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
+     * @param  array  $scopes
+     * @param  string  $guard
+     * @return void
+     */
+    public static function actingAs($user, $scopes = [], $guard = 'api')
+    {
+        $token = Mockery::mock(Token::class)->shouldIgnoreMissing(false);
+
+        foreach ($scopes as $scope) {
+            $token->shouldReceive('can')->with($scope)->andReturn(true);
+        }
+
+        $user->withAccessToken($token);
+
+        app('auth')->guard($guard)->setUser($user);
+
+        app('auth')->shouldUse($guard);
     }
 
     /**
@@ -289,18 +344,6 @@ class Passport
     public static function useClientUUIDs()
     {
         static::$useClientUUIDs = true;
-
-        return new static;
-    }
-    
-    /**
-     * Instruct Passport to use auth:api middleware for personal access token routes
-     *
-     * @return static
-     */
-    public static function personalAccessTokenRouteMiddleware(array $middleware)
-    {
-        static::$personalAccessTokenRouteMiddleware = $middleware;
 
         return new static;
     }
