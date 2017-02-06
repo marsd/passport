@@ -129,9 +129,7 @@ class RouteRegistrar
      */
     public function forPersonalAccessTokens()
     {
-        $middleware = Passport::$personalAccessTokenRouteMiddleware;
-
-        $this->router->group(['middleware' => $middleware], function ($router) {
+        $this->router->group(['middleware' => ['web', 'auth']], function ($router) {
             $router->get('/oauth/scopes', [
                 'uses' => 'ScopeController@all',
             ]);

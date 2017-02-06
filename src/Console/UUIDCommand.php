@@ -26,19 +26,6 @@ class UUIDCommand extends Command
     protected $description = 'Generate version 4 UUIDs for existing Passport clients';
 
     /**
-     *
-     * @return null
-     */
-    public function __construct()
-    {
-        parent::__construct();
-
-        if (!Passport::$useClientUUIDs) {
-            exit;
-        }
-    }
-
-    /**
      * Execute the console command.
      *
      * @return mixed
@@ -46,10 +33,12 @@ class UUIDCommand extends Command
     public function handle()
     {
         $this->comment('Checking for `uuid` column in `oauth_clients`...');
+
         if (!Schema::hasColumn('oauth_clients', 'uuid')) {
             Schema::table('oauth_clients', function(Blueprint $table) {
                 $table->char('uuid', 36)->unique()->after('name')->nullable();
             });
+
             $this->line('✓ Created new column `uuid` in `oauth_clients`.');
         } else {
             $this->line('✓ OK.');

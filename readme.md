@@ -11,25 +11,22 @@ requests, both authorization and lookup.
 
 ## Usage
 
-To start using Client UUIDs, open up your `AuthServiceProvider.php` file and add:
+To start using Client UUIDs, open up your `AppServiceProvider.php` file and add:
 
 ```php
-// AuthServiceProvider.php
+// AppServiceProvider.php
 ...
 
 public function boot()
 {
-    $this->registerPolicies();
-
-    Passport::tokensExpireIn(Carbon::now()->addDays(15));
-    Passport::refreshTokensExpireIn(Carbon::now()->addDays(30));
-
     // Add this line along with your other Passport options
     Passport::useClientUUIDs();
 
-    Passport::tokensCan(config('api.scopes_all'));
+    // If you're using custom migrations, you will need to run
+    // the passport:uuid command after running migrations
+    Passport::ignoreMigrations();
 
-    Passport::routes();
+    // OR add in the $t->char('uuid', 36); column to the migration yourself.
 }
 
 ...
