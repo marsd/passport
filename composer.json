@@ -1,5 +1,8 @@
 {
-    "name": "laravel/passport",
+    "name": "marsd/passport",
+    "replace": {
+        "laravel/passport": "2.*"
+    },
     "description": "Laravel Passport provides OAuth2 server support to Laravel.",
     "keywords": ["laravel", "passport", "oauth"],
     "license": "MIT",
