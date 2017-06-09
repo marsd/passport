@@ -3,6 +3,7 @@
 namespace Laravel\Passport;
 
 use Ramsey\Uuid\Uuid as UUID;
+use MysqlUuid\Uuid as MysqlUuid;
 
 class ClientRepository
 {
@@ -103,7 +104,8 @@ class ClientRepository
         ];
 
         if (Passport::$useClientUUIDs) {
-            $data['uuid'] = UUID::uuid4()->toString();
+            $reordered = new MysqlUuid(UUID::uuid1()->toString());
+            $data['uuid'] = str_replace('-', '', $reordered->toFormat(new ReorderedString()));
         }
 
         $client = (new Client)->forceFill($data);

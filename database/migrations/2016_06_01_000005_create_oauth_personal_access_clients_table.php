@@ -15,8 +15,13 @@ class CreateOauthPersonalAccessClientsTable extends Migration
     {
         Schema::create('oauth_personal_access_clients', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('client_id')->index();
+            $table->char('client_id', 32);
             $table->timestamps();
+        });
+        
+        DB::statement('ALTER TABLE `oauth_personal_access_clients` ROW_FORMAT=COMPRESSED;');
+        Schema::table('oauth_personal_access_clients', function ($table) {
+            $table->index('client_id');
         });
     }
 

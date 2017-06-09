@@ -8,6 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Ramsey\Uuid\Uuid as UUID;
+use MysqlUuid\Uuid as MysqlUuid;
 
 class UUIDCommand extends Command
 {
@@ -36,7 +37,7 @@ class UUIDCommand extends Command
 
         if (!Schema::hasColumn('oauth_clients', 'uuid')) {
             Schema::table('oauth_clients', function(Blueprint $table) {
-                $table->char('uuid', 36)->unique()->after('name')->nullable();
+                $table->char('uuid', 32)->unique()->after('name')->nullable();
             });
 
             $this->line('✓ Created new column `uuid` in `oauth_clients`.');
@@ -44,12 +45,13 @@ class UUIDCommand extends Command
             $this->line('✓ OK.');
         }
 
-        $this->comment('Generating version 4 UUIDs for Passport clients...');
+        $this->comment('Generating reordered UUID v1 for Passport clients...');
 
         $clients = Client::where('uuid', null)->get();
 
         foreach($clients as $client) {
-            $client->uuid = UUID::uuid4()->toString();
+            $reordered = new MysqlUuid(UUID::uuid1()->toString());
+            $client->uuid = str_replace('-', '', $reordered->toFormat(new ReorderedString()));
             $client->save();
         }
 

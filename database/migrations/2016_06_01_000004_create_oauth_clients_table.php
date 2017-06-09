@@ -15,15 +15,22 @@ class CreateOauthClientsTable extends Migration
     {
         Schema::create('oauth_clients', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('user_id')->index()->nullable();
+            $table->char('user_id', 32)->nullable();
             $table->string('name');
-            $table->char('uuid', 36)->unique()->nullable();
+            $table->char('uuid', 32)->nullable();
             $table->string('secret', 100);
             $table->text('redirect');
             $table->boolean('personal_access_client');
             $table->boolean('password_client');
             $table->boolean('revoked');
             $table->timestamps();
+        });
+        
+        DB::statement('ALTER TABLE `oauth_clients` ROW_FORMAT=COMPRESSED;');
+        Schema::table('oauth_clients', function ($table) {
+            $table->primary('id');
+            $table->index('user_id');
+            $table->unique('uuid');
         });
     }
 

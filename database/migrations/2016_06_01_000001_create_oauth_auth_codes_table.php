@@ -15,11 +15,16 @@ class CreateOauthAuthCodesTable extends Migration
     {
         Schema::create('oauth_auth_codes', function (Blueprint $table) {
             $table->string('id', 100)->primary();
-            $table->integer('user_id');
-            $table->integer('client_id');
+            $table->char('user_id', 32);
+            $table->char('client_id', 32);
             $table->text('scopes')->nullable();
             $table->boolean('revoked');
             $table->dateTime('expires_at')->nullable();
+        });
+        
+        DB::statement('ALTER TABLE `oauth_auth_codes` ROW_FORMAT=COMPRESSED;');
+        Schema::table('oauth_access_tokens', function ($table) {
+            $table->index(['user_id', 'client_id']);
         });
     }
 

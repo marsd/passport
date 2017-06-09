@@ -2,12 +2,15 @@
 
 ## Introduction
 
-This is a fork of the `laravel/passport` package with added support for Client UUIDs.
+This is a fork of `heisan/passport` of the for `laravel/passport` package with added support for Client UUIDs.
 This package will be kept up-to-date with the latest `laravel/passport` version.
 
 This package retains the `oauth_clients.id` column for indexing & internal
-use, while adding a `char(36)` `oauth_clients.uuid` column used for public-facing
+use, while adding a `char(32)` `oauth_clients.uuid` column used for public-facing
 requests, both authorization and lookup.
+
+It uses `vend/mysql-uuid` to generate a reordered, optimized Uuid based on https://www.percona.com/blog/2014/12/19/store-uuid-optimized-way/
+   
 
 ## Usage
 
@@ -26,7 +29,7 @@ public function boot()
     // the passport:uuid command after running migrations
     Passport::ignoreMigrations();
 
-    // OR add in the $t->char('uuid', 36); column to the migration yourself.
+    // OR add in the $t->char('uuid', 32); column to the migration yourself.
 }
 
 ...
